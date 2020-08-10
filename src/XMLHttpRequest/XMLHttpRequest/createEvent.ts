@@ -10,17 +10,26 @@ export function createEvent(options: any, target: any, type: string) {
     'timeout',
     'abort',
   ]
-
-  const event = progressEvents.includes(type)
-    ? new ProgressEvent(type, {
-        lengthComputable: true,
-        loaded: options?.loaded || 0,
-        total: options?.total || 0,
-      })
-    : new EventOverride(type, {
-        target,
-        currentTarget: target,
-      })
-
-  return event
+  
+  if (progressEvents.includes(type)) {
+    const peOptions = {
+      lengthComputable: true,
+      loaded: options?.loaded || 0,
+      total: options?.total || 0,
+    };
+      
+    const event = typeof ProgressEvent === "undefined"
+      ? { type, ...peOptions }
+      : new ProgressEvent(type, peOptions);
+    
+    return event;
+      
+  } else {
+    const event = new EventOverride(type, {
+      target,
+      currentTarget: target,
+    });
+    
+    return event;
+  }
 }
